@@ -7,11 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const links = [
-  { href: '/student/dashboard', label: '🏠 Tableau de bord' },
-  { href: '/student/libretto',  label: '📋 Libretto' },
-  { href: '/student/exams',     label: '📅 Examens' },
-  { href: '/student/fees',      label: '💶 Frais' },
-  { href: '/student/thesis',    label: '🎓 Thèse' },
+  { href: '/student/dashboard',     label: '🏠 Tableau de bord' },
+  { href: '/student/libretto',      label: '📋 Libretto' },
+  { href: '/student/exams',         label: '📅 Examens' },
+  { href: '/student/fees',          label: '💶 Frais' },
+  { href: '/student/certificates',  label: '📄 Certificats' },
+  { href: '/student/thesis',        label: '🎓 Thèse' },
 ]
 
 export function StudentNav({ fullName, matricola }: { fullName: string; matricola?: string }) {

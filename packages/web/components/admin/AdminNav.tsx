@@ -7,8 +7,10 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const links = [
-  { href: '/admin/dashboard', label: '🏠 Accueil' },
-  { href: '/admin/students',  label: '🎓 Immatriculations' },
+  { href: '/admin/dashboard',     label: '🏠 Accueil' },
+  { href: '/admin/students',      label: '🎓 Immatriculations' },
+  { href: '/admin/fees',          label: '💶 Frais' },
+  { href: '/admin/certificates',  label: '📄 Certificats' },
 ]
 
 export function AdminNav({ fullName, role }: { fullName: string; role: string }) {
