@@ -11,6 +11,8 @@ const links = [
   { href: '/teacher/courses',   label: '📚 Mes cours' },
 ]
 
+// Note: le lien E-Learning est disponible dans la page de chaque cours
+
 export function TeacherNav({
   fullName,
   title,

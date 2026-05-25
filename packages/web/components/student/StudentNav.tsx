@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 const links = [
   { href: '/student/dashboard',     label: '🏠 Tableau de bord' },
   { href: '/student/libretto',      label: '📋 Libretto' },
+  { href: '/student/courses',       label: '🖥 Cours en ligne' },
   { href: '/student/exams',         label: '📅 Examens' },
   { href: '/student/fees',          label: '💶 Frais' },
   { href: '/student/certificates',  label: '📄 Certificats' },

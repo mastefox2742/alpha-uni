@@ -81,6 +81,16 @@ export default async function CourseDetailPage({
         )}
       </div>
 
+      {/* Actions rapides */}
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Link
+          href={`/teacher/courses/${id}/elearning`}
+          className="rounded-md border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
+        >
+          🖥 E-Learning
+        </Link>
+      </div>
+
       {/* Sessions d'examen */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Sessions d'examen (Appelli)</h2>

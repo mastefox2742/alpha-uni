@@ -8,6 +8,9 @@ import { gradesRouter }        from './grades.routes'
 import { feesRouter }          from './fees.routes'
 import { certificatesRouter }  from './certificates.routes'
 import { notificationsRouter } from './notifications.routes'
+import { elearningRouter }    from './elearning.routes'
+import { quizRouter }         from './quiz.routes'
+import { forumRouter }        from './forum.routes'
 
 export const router = Router()
 
@@ -27,6 +30,11 @@ router.use('/grades',      gradesRouter)
 router.use('/fees',          feesRouter)
 router.use('/certificates',  certificatesRouter)
 router.use('/notifications', notificationsRouter)
+
+// Phase 4 — E-Learning
+router.use('/elearning',     elearningRouter)
+router.use('/quiz',          quizRouter)
+router.use('/forum',         forumRouter)
 
 // À venir
 // router.use('/thesis',      thesisRouter)
