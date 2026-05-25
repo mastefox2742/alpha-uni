@@ -1,19 +1,34 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { StudentNav } from '@/components/student/StudentNav'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, first_name, last_name')
     .eq('id', user.id)
     .single()
 
   if (profile?.role !== 'student') redirect('/403')
 
-  return <>{children}</>
+  const { data: student } = await supabase
+    .from('students')
+    .select('matricola')
+    .eq('user_id', user.id)
+    .single()
+
+  const fullName = `${profile.first_name as string} ${profile.last_name as string}`.trim()
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <StudentNav fullName={fullName} matricola={student?.matricola ?? undefined} />
+      <main className="flex-1 overflow-y-auto bg-background p-8">
+        {children}
+      </main>
+    </div>
+  )
 }
