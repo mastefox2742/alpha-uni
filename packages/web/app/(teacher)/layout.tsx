@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { TeacherNav } from '@/components/teacher/TeacherNav'
 
 export default async function TeacherLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -9,11 +10,29 @@ export default async function TeacherLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, first_name, last_name')
     .eq('id', user.id)
     .single()
 
   if (profile?.role !== 'teacher') redirect('/403')
 
-  return <>{children}</>
+  // Récupérer les infos enseignant
+  const { data: teacher } = await supabase
+    .from('teachers')
+    .select('title, departments!department_id(name)')
+    .eq('user_id', user.id)
+    .single()
+
+  const fullName   = `${profile.first_name} ${profile.last_name}`.trim()
+  const title      = (teacher as any)?.title ?? undefined
+  const department = (teacher as any)?.departments?.name ?? undefined
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <TeacherNav fullName={fullName} title={title} department={department} />
+      <main className="flex-1 overflow-y-auto bg-background">
+        {children}
+      </main>
+    </div>
+  )
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DocumentReview } from '@/components/admin/DocumentReview'
@@ -28,12 +29,23 @@ export default async function ApplicationDetailPage({
 
   if (error || !app) redirect('/admin/students')
 
-  const user    = app.user as { first_name: string; last_name: string } | null
-  const program = app.degree_program as { name: string; type: string; duration_years: number; total_cfu: number } | null
-  const docs    = (app.enrollment_documents ?? []) as Array<{ id: string; type: string; file_name: string; file_url: string; is_verified: boolean }>
+  const user    = (app.user as any) as { first_name: string; last_name: string } | null
+  const program = (app.degree_program as any) as { name: string; type: string; duration_years: number; total_cfu: number } | null
+  const docs    = (app.enrollment_documents ?? []) as Array<{
+    id: string; type: string; file_name: string; file_url: string; is_verified: boolean
+  }>
 
   return (
-    <div className="space-y-8">
+    <div className="container max-w-4xl py-8 space-y-8">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/admin/students" className="hover:text-foreground">Dossiers</Link>
+        <span>›</span>
+        <span className="text-foreground font-medium">
+          {user ? `${user.first_name} ${user.last_name}` : 'Candidat'}
+        </span>
+      </nav>
+
       {/* En-tête */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

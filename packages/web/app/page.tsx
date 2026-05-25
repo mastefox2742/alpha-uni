@@ -1,21 +1,16 @@
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function RootPage() {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) {
-    redirect('/login')
-  }
+  if (!user) redirect('/login')
 
-  // Redirection selon le rôle
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single()
 
   switch (profile?.role) {

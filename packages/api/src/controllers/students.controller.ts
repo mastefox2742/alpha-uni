@@ -13,7 +13,11 @@ export async function getGrades(req: AuthenticatedRequest, res: Response) {
   const semester   = req.query.semester   ? Number(req.query.semester)   : undefined
   const courseYear = req.query.courseYear ? Number(req.query.courseYear) : undefined
 
-  const grades = await getStudentGrades(req.user!.id, { semester, courseYear })
+  const filter: { semester?: number; courseYear?: number } = {}
+  if (semester !== undefined)   filter.semester   = semester
+  if (courseYear !== undefined) filter.courseYear = courseYear
+
+  const grades = await getStudentGrades(req.user!.id, filter)
   return res.json({ data: grades })
 }
 
