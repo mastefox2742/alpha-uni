@@ -11,6 +11,7 @@ const links = [
   { href: '/admin/students',      label: '🎓 Immatriculations' },
   { href: '/admin/fees',          label: '💶 Frais' },
   { href: '/admin/certificates',  label: '📄 Certificats' },
+  { href: '/admin/thesis',        label: '📑 Thèses' },
 ]
 
 export function AdminNav({ fullName, role }: { fullName: string; role: string }) {

@@ -36,5 +36,6 @@ router.use('/elearning',     elearningRouter)
 router.use('/quiz',          quizRouter)
 router.use('/forum',         forumRouter)
 
-// À venir
-// router.use('/thesis',      thesisRouter)
+// Phase 5 — Thèse & Finalisation
+import { thesisRouter } from './thesis.routes'
+router.use('/thesis',        thesisRouter)
