@@ -1,18 +1,12 @@
 import type { Metadata } from 'next'
-import { LibrettoTable } from '@/components/student/LibrettoTable'
+import { LibrettoPage } from '@/components/student/LibrettoPage'
 
 export const metadata: Metadata = { title: 'Libretto — Carnet de notes' }
 
-export default function LibrettoPage() {
+export default function LibrettoRoute() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Libretto Universitario</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Toutes vos notes acceptées et publiées.
-        </p>
-      </div>
-      <LibrettoTable />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <LibrettoPage />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { authMiddleware, type AuthenticatedRequest } from '../middleware/auth.middleware'
 import { requireRole } from '../middleware/rbac.middleware'
+import { validate, CreateFeeSchema, PayFeeSchema, WaiveFeeSchema } from '../middleware/validate'
 import {
   getStudentFees,
   getStudentFeesSummary,
@@ -64,16 +65,11 @@ feesRouter.get('/',
 feesRouter.post('/',
   authMiddleware,
   requireRole('admin', 'secretary'),
+  validate(CreateFeeSchema),
   async (req, res) => {
     try {
       const { studentId, academicYearId, amount, dueDate } = req.body as {
-        studentId: string
-        academicYearId: string
-        amount: number
-        dueDate: string
-      }
-      if (!studentId || !academicYearId || !amount || !dueDate) {
-        return res.status(400).json({ error: 'studentId, academicYearId, amount, dueDate sont requis' })
+        studentId: string; academicYearId: string; amount: number; dueDate: string
       }
       const fee = await createFee({ studentId, academicYearId, amount, dueDate })
       return res.status(201).json({ data: fee })
@@ -90,6 +86,7 @@ feesRouter.post('/',
 feesRouter.post('/:id/pay',
   authMiddleware,
   requireRole('admin', 'secretary'),
+  validate(PayFeeSchema),
   async (req, res) => {
     try {
       const { paymentRef, method, amount } = req.body as {

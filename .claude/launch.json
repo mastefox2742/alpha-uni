@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "cwd": "packages/web",
+      "autoPort": true
+    },
+    {
+      "name": "storyboard",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", ".", "-p", "4500", "--no-clipboard"],
+      "port": 4500
+    }
+  ]
+}

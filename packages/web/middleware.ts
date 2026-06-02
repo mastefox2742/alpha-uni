@@ -3,7 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 
 // Routes publiques — pas besoin d'être connecté
-const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password']
+const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/enrollment']
 
 // Routes réservées par rôle
 const ROLE_ROUTES: Record<string, string[]> = {
@@ -15,6 +15,9 @@ const ROLE_ROUTES: Record<string, string[]> = {
 export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname } = request.nextUrl
+
+  // ── DEMO MODE : bypass auth (enlever NEXT_PUBLIC_DEMO_MODE=true du .env pour activer l'auth) ──
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') return supabaseResponse
 
   // Laisser passer les routes publiques
   if (PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {

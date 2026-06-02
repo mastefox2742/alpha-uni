@@ -10,10 +10,23 @@ out/
 .expo/
 *.tsbuildinfo
 
-# Environment
+# Environment — JAMAIS commiter des fichiers d'env réels
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
+.env.prod
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+# Secrets spécifiques
+*service-account*.json
+*credentials*.json
+*secrets*.json
+*keystore*.jks
 
 # Logs
 *.log
@@ -36,3 +49,9 @@ coverage/
 # Supabase
 supabase/.branches
 supabase/.temp
+
+# Sécurité — ne jamais commiter
+*.secret
+.doppler-token
+vault-token.txt
+.aws/credentials

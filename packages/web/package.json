@@ -29,10 +29,12 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "dompurify": "^3.4.7",
     "postcss": "^8.4.38",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "tailwindcss": "^3.4.0",

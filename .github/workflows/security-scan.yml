@@ -1,0 +1,132 @@
+name: Security — OWASP ZAP Pentest
+
+on:
+  # Scan automatique chaque semaine (dimanche 02h00)
+  schedule:
+    - cron: '0 2 * * 0'
+  # Scan manuel depuis l'UI GitHub
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'URL cible (défaut: staging)'
+        required: false
+        default: 'https://unigest-staging.vercel.app'
+
+concurrency:
+  group: security-scan
+  cancel-in-progress: true
+
+jobs:
+  zap-scan:
+    name: OWASP ZAP — Scan automatisé
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ─── 1. ZAP Baseline Scan ───────────────────────────────────────────────
+      # Scan passif — ne modifie pas les données, détecte les vulnérabilités courantes
+      - name: ZAP Baseline Scan (web frontend)
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'https://unigest-staging.vercel.app' }}
+          rules_file_name: '.github/zap-rules.tsv'
+          cmd_options: '-a -j'   # -a scan ajax, -j format JSON
+          issue_title: '🔐 ZAP Security Scan Results'
+          token:  ${{ secrets.GITHUB_TOKEN }}
+          fail_action: false    # Ne bloque pas le CI — crée une issue à la place
+
+      # ─── 2. ZAP API Scan ────────────────────────────────────────────────────
+      # Scan de l'API avec OpenAPI/swagger (si disponible)
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        continue-on-error: true
+        with:
+          target: ${{ github.event.inputs.target_url || 'https://api-unigest-staging.up.railway.app' }}/api
+          format: openapi
+          cmd_options: '-a'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─── 3. Upload rapport SARIF ────────────────────────────────────────────
+      - name: Upload ZAP SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif
+          category: zap-pentest
+
+      # ─── 4. Notification en cas de vulnérabilité haute/critique ─────────────
+      - name: Notify on critical findings
+        if: failure()
+        run: |
+          echo "⚠️ Des vulnérabilités critiques ont été détectées !"
+          echo "Consultez l'onglet Security → Code scanning alerts"
+          echo "Et l'issue créée par ZAP dans Issues"
+
+  # ─── Scan des headers de sécurité ──────────────────────────────────────────
+  headers-check:
+    name: Vérification headers sécurité
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check security headers (web)
+        run: |
+          URL="${{ github.event.inputs.target_url || 'https://unigest-staging.vercel.app' }}"
+          echo "=== Security Headers Check: $URL ==="
+
+          HEADERS=$(curl -sI "$URL")
+
+          check_header() {
+            local name="$1"
+            if echo "$HEADERS" | grep -qi "$name"; then
+              echo "✅ $name"
+            else
+              echo "❌ MANQUANT: $name"
+              echo "::warning::Header de sécurité manquant: $name"
+            fi
+          }
+
+          check_header "strict-transport-security"
+          check_header "content-security-policy"
+          check_header "x-frame-options"
+          check_header "x-content-type-options"
+          check_header "referrer-policy"
+          check_header "permissions-policy"
+
+      - name: Check security headers (API)
+        run: |
+          URL="https://api-unigest-staging.up.railway.app/health"
+          echo "=== API Headers Check: $URL ==="
+          curl -sI "$URL" | grep -i -E "(x-frame|x-content|strict-transport|referrer|x-xss)" || true
+
+  # ─── Test brute force protection ───────────────────────────────────────────
+  bruteforce-check:
+    name: Vérification rate limiting login
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test rate limiting sur /api/auth/login
+        run: |
+          API_URL="https://api-unigest-staging.up.railway.app"
+          echo "=== Rate Limit Test (login) ==="
+
+          BLOCKED=0
+          for i in $(seq 1 8); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$API_URL/api/auth/login" \
+              -H "Content-Type: application/json" \
+              -d '{"email":"test@test.com","password":"wrongpassword"}')
+            echo "Tentative $i: HTTP $STATUS"
+            if [ "$STATUS" = "429" ]; then
+              BLOCKED=1
+              echo "✅ Rate limit actif après $i tentatives"
+              break
+            fi
+          done
+
+          if [ "$BLOCKED" = "0" ]; then
+            echo "❌ CRITIQUE: Rate limiting non actif sur /api/auth/login !"
+            echo "::error::Rate limiting manquant sur /auth/login — risque brute force"
+            exit 1
+          fi

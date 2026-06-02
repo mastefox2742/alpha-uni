@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔐 UniGest — Vérifications pré-commit..."
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || echo "")
+
+# ─── 1. Bloquer les fichiers .env réels ───────────────────────────────────────
+if echo "$STAGED_FILES" | grep -qE "^\.env$|\.env\.local$|\.env\.(production|staging|prod)"; then
+  echo "❌ Tentative de commit d'un fichier .env — BLOQUÉ"
+  echo "   Les fichiers d'environnement ne doivent jamais être commités."
+  exit 1
+fi
+
+# ─── 2. Scan de secrets ────────────────────────────────────────────────────────
+echo "🔍 Scan de secrets dans les fichiers stagés..."
+
+SECRET_FOUND=0
+for file in $STAGED_FILES; do
+  # Ignore node_modules, dist, .env.example, documentation markdown
+  echo "$file" | grep -qE "node_modules|dist/|\.env\.example|\.md$|\.toml$" && continue
+  [ ! -f "$file" ] && continue
+
+  # Patterns de secrets réels
+  if grep -qE "(SUPABASE_SERVICE_ROLE_KEY\s*=\s*ey|RESEND_API_KEY\s*=\s*re_[A-Za-z0-9]|sk-[A-Za-z0-9]{48}|ghp_[A-Za-z0-9]{36}|NEXTAUTH_SECRET\s*=\s*[a-zA-Z0-9+/]{32})" "$file" 2>/dev/null; then
+    echo "❌ Secret potentiel détecté dans : $file"
+    SECRET_FOUND=1
+  fi
+done
+
+if [ $SECRET_FOUND -eq 1 ]; then
+  echo ""
+  echo "   Supprimez les secrets avant de committer."
+  echo "   Pour ignorer (faux positif) : git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ Pré-commit : aucun secret détecté !"

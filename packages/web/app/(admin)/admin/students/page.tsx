@@ -1,18 +1,12 @@
 import type { Metadata } from 'next'
-import { ApplicationsTable } from '@/components/admin/ApplicationsTable'
+import { AdminStudents } from '@/components/admin/AdminStudents'
 
-export const metadata: Metadata = { title: 'Dossiers étudiants' }
+export const metadata: Metadata = { title: 'Dossiers & Inscriptions — UniGest Admin' }
 
 export default function AdminStudentsPage() {
   return (
-    <div className="container max-w-5xl py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Dossiers d'immatriculation</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Examinez et validez les demandes d'inscription des étudiants.
-        </p>
-      </div>
-      <ApplicationsTable />
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <AdminStudents />
     </div>
   )
 }

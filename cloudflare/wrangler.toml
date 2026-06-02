@@ -1,0 +1,23 @@
+name       = "unigest-waf"
+main       = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# ─── Routes ───────────────────────────────────────────────────────────────────
+# Le Worker se place devant l'API Railway ET le frontend Vercel
+routes = [
+  { pattern = "api.unigest.fr/*",     zone_name = "unigest.fr" },
+  { pattern = "unigest.fr/*",         zone_name = "unigest.fr" },
+  { pattern = "www.unigest.fr/*",     zone_name = "unigest.fr" },
+]
+
+# ─── Variables d'environnement ────────────────────────────────────────────────
+[vars]
+API_ORIGIN     = "https://api-unigest.up.railway.app"
+WEB_ORIGIN     = "https://unigest.vercel.app"
+RATE_LIMIT_RPS = "100"
+
+# ─── KV Namespace pour rate limiting distribué ───────────────────────────────
+[[kv_namespaces]]
+binding  = "RATE_LIMIT_KV"
+id       = "REMPLACER_PAR_KV_NAMESPACE_ID"
+preview_id = "REMPLACER_PAR_KV_PREVIEW_ID"

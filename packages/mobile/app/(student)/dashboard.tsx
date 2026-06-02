@@ -1,10 +1,11 @@
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Alert, ActivityIndicator,
+  TouchableOpacity, ActivityIndicator,
 } from 'react-native'
 import { useEffect, useState } from 'react'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/supabase'
+import { colors } from '@/lib/theme'
 import type { Session } from '@supabase/supabase-js'
 
 type Profile = {
@@ -117,17 +118,25 @@ export default function DashboardScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Ciao,</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.greeting}>Bonjour,</Text>
           <Text style={styles.name}>{fullName} 👋</Text>
           {dp && <Text style={styles.program}>{dp.name}</Text>}
           {student?.matricola && (
             <Text style={styles.matricola}>Matr. {student.matricola}</Text>
           )}
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-          <Text style={styles.logoutText}>🚪</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => router.push('/(student)/notifications')}
+            style={styles.iconBtn}
+          >
+            <Text style={{ fontSize: 22 }}>🔔</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout} style={styles.iconBtn}>
+            <Text style={{ fontSize: 22 }}>🚪</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -179,9 +188,12 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Accès rapide</Text>
           <View style={styles.quickActions}>
             <QuickAction emoji="📋" label="Mon libretto" onPress={() => router.push('/(student)/libretto')} />
-            <QuickAction emoji="🖥"  label="Cours"       onPress={() => router.push('/(student)/courses')} />
-            <QuickAction emoji="📅"  label="Examens"     onPress={() => router.push('/(student)/exams')} />
-            <QuickAction emoji="💶"  label="Frais"       onPress={() => router.push('/(student)/fees')} />
+            <QuickAction emoji="📝" label="Examens"      onPress={() => router.push('/(student)/exams')} />
+            <QuickAction emoji="🗓️" label="Planning"    onPress={() => router.push('/(student)/schedule')} />
+            <QuickAction emoji="💶" label="Frais"        onPress={() => router.push('/(student)/fees')} />
+            <QuickAction emoji="📖" label="Ma thèse"     onPress={() => router.push('/(student)/thesis' as Parameters<typeof router.push>[0])} />
+            <QuickAction emoji="🔔" label="Notifications" onPress={() => router.push('/(student)/notifications')} />
+            <QuickAction emoji="👤" label="Mon profil"  onPress={() => router.push('/(student)/profile')} />
           </View>
         </>
       )}
@@ -226,8 +238,7 @@ const styles = StyleSheet.create({
   name:      { fontSize: 24, fontWeight: '800', color: '#111827', marginTop: 2 },
   program:   { fontSize: 13, color: '#6b7280', marginTop: 4 },
   matricola: { fontSize: 12, color: '#9ca3af', marginTop: 2 },
-  logoutBtn: { padding: 8 },
-  logoutText:{ fontSize: 22 },
+  iconBtn: { padding: 8 },
 
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
 

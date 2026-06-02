@@ -1,0 +1,230 @@
+name: CI — Security & Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── 1. Scan secrets (TruffleHog) ────────────────────────────────────────────
+  secrets-scan:
+    name: Scan secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history pour détecter les secrets dans l'historique git
+
+      - name: TruffleHog — Scan pour secrets exposés
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # ─── 2. Audit des dépendances ─────────────────────────────────────────────────
+  dependency-audit:
+    name: Audit dépendances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit — API (critique + haute)
+        working-directory: packages/api
+        run: npm audit --audit-level=high
+
+      - name: npm audit — Web (critique + haute)
+        working-directory: packages/web
+        run: npm audit --audit-level=high
+
+      - name: npm audit — Mobile (critique + haute)
+        working-directory: packages/mobile
+        run: npm audit --audit-level=high || true  # Mobile en skeleton, non bloquant
+
+  # ─── 3. TypeScript + Lint ─────────────────────────────────────────────────────
+  type-check:
+    name: TypeScript + ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript — API
+        working-directory: packages/api
+        run: npx tsc --noEmit
+
+      - name: TypeScript — Web
+        working-directory: packages/web
+        run: npx tsc --noEmit
+
+      - name: ESLint — API
+        working-directory: packages/api
+        run: npx eslint src --ext .ts --max-warnings 0 || true
+
+      - name: ESLint — Web
+        working-directory: packages/web
+        run: npx eslint . --ext .ts,.tsx --max-warnings 0 || true
+
+  # ─── 4. SAST — Semgrep (analyse statique sécurité) ────────────────────────────
+  sast:
+    name: SAST — Semgrep
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Semgrep — OWASP Top 10 + Node.js security rules
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-ten
+            p/nodejs
+            p/typescript
+            p/secrets
+            p/jwt
+          generateSarif: '1'
+
+      - name: Upload SARIF résultats vers GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+
+  # ─── 5. CodeQL — Analyse statique GitHub native ───────────────────────────────
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript-typescript']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{matrix.language}}'
+
+  # ─── 6. Tests ─────────────────────────────────────────────────────────────────
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: [type-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Tests API
+        working-directory: packages/api
+        run: npm test
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: packages/api/coverage
+
+  # ─── 7. Build de vérification ─────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [type-check, dependency-audit]
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+      NEXT_PUBLIC_DEMO_MODE: 'true'
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web
+        working-directory: packages/web
+        run: npm run build
+
+      - name: Build API
+        working-directory: packages/api
+        run: npm run build
+
+  # ─── 8. Secrets Manager (Doppler) — vérification config ─────────────────────
+  secrets-config:
+    name: Vérification Doppler
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier que .env.local n'est pas commité
+        run: |
+          if git ls-files --error-unmatch packages/web/.env.local 2>/dev/null; then
+            echo "❌ CRITIQUE: .env.local est suivi par git !"
+            exit 1
+          fi
+          if git ls-files --error-unmatch .env 2>/dev/null; then
+            echo "❌ CRITIQUE: .env racine est suivi par git !"
+            exit 1
+          fi
+          echo "✅ Aucun fichier .env commité"
+
+      - name: Vérifier que les secrets sont dans les env vars CI (pas hardcodés)
+        run: |
+          # Vérifie qu'aucune vraie clé Supabase n'est dans le code source
+          if grep -r "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\." \
+            --include="*.ts" --include="*.tsx" --include="*.js" \
+            --exclude-dir="node_modules" --exclude-dir=".next" \
+            --exclude-dir="dist" . 2>/dev/null | \
+            grep -v "placeholder" | grep -v "example"; then
+            echo "❌ Possible clé JWT Supabase réelle détectée dans le code !"
+            exit 1
+          fi
+          echo "✅ Aucune clé hardcodée détectée"

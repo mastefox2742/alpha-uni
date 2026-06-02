@@ -27,7 +27,8 @@ async function getOrCreateForum(ecId: string): Promise<string> {
     .eq('id', ecId)
     .single()
 
-  const courseName = ((ec?.courses) as { name: string } | null)?.name ?? 'Cours'
+  const courseRaw  = ec?.courses as Array<{ name: string }> | { name: string } | null
+  const courseName = (Array.isArray(courseRaw) ? courseRaw[0] : courseRaw)?.name ?? 'Cours'
 
   const { data: forum, error } = await supabase
     .from('forums')

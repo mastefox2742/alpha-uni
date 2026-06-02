@@ -3,6 +3,15 @@ import { createClient } from '@/lib/supabase/server'
 import { TeacherNav } from '@/components/teacher/TeacherNav'
 
 export default async function TeacherLayout({ children }: { children: React.ReactNode }) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <TeacherNav fullName="Prof. Demo" title="Dr." department="Informatique" />
+        <main className="flex-1 overflow-y-auto bg-background">{children}</main>
+      </div>
+    )
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

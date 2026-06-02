@@ -145,7 +145,8 @@ export async function rejectApplication(applicationId: string, secretaryId: stri
   // Email de rejet
   if (app) {
     const { data: authUser } = await supabase.auth.admin.getUserById(app.user_id as string)
-    const profile = app.profiles as { first_name: string } | null
+    const profileRaw = app.profiles as Array<{ first_name: string }> | { first_name: string } | null
+    const profile = Array.isArray(profileRaw) ? (profileRaw[0] ?? null) : profileRaw
     if (authUser?.user?.email) {
       await sendRejectionEmail({
         to:        authUser.user.email,

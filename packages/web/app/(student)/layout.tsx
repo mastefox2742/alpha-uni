@@ -9,7 +9,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, first_name, last_name')
+    .select('role, first_name, last_name, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -21,11 +21,12 @@ export default async function StudentLayout({ children }: { children: React.Reac
     .eq('user_id', user.id)
     .single()
 
-  const fullName = `${profile.first_name as string} ${profile.last_name as string}`.trim()
+  const fullName  = `${profile.first_name as string} ${profile.last_name as string}`.trim()
+  const avatarUrl = (profile.avatar_url as string | null) ?? undefined
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <StudentNav fullName={fullName} matricola={student?.matricola ?? undefined} />
+      <StudentNav fullName={fullName} matricola={student?.matricola ?? undefined} avatarUrl={avatarUrl} />
       <main className="flex-1 overflow-y-auto bg-background p-8">
         {children}
       </main>

@@ -1,11 +1,23 @@
 import { Tabs } from 'expo-router'
-import { StyleSheet, View, Text } from 'react-native'
+import { StyleSheet, View, Text, Platform } from 'react-native'
+import { colors, spacing, radius, typography } from '@/lib/theme'
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
+function TabIcon({
+  emoji, label, focused, badge,
+}: {
+  emoji: string; label: string; focused: boolean; badge?: number
+}) {
   return (
-    <View style={styles.tabItem}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
+    <View style={tabStyles.item}>
+      <View>
+        <Text style={[tabStyles.emoji, focused && tabStyles.emojiFocused]}>{emoji}</Text>
+        {badge !== undefined && badge > 0 && (
+          <View style={tabStyles.badge}>
+            <Text style={tabStyles.badgeText}>{badge > 9 ? '9+' : badge}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[tabStyles.label, focused && tabStyles.labelFocused]}>{label}</Text>
     </View>
   )
 }
@@ -15,7 +27,7 @@ export default function StudentLayout() {
     <Tabs
       screenOptions={{
         headerShown:     false,
-        tabBarStyle:     styles.tabBar,
+        tabBarStyle:     tabStyles.bar,
         tabBarShowLabel: false,
       }}
     >
@@ -36,18 +48,18 @@ export default function StudentLayout() {
         }}
       />
       <Tabs.Screen
-        name="courses"
+        name="exams"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🖥" label="Cours" focused={focused} />
+            <TabIcon emoji="📝" label="Examens" focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="exams"
+        name="schedule"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📅" label="Examens" focused={focused} />
+            <TabIcon emoji="🗓️" label="Planning" focused={focused} />
           ),
         }}
       />
@@ -59,41 +71,69 @@ export default function StudentLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="👤" label="Profil" focused={focused} />
+          ),
+        }}
+      />
+      {/* Screens accessibles mais sans onglet visible */}
+      <Tabs.Screen
+        name="notifications"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="thesis"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="courses"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="certificates"
+        options={{ href: null }}
+      />
     </Tabs>
   )
 }
 
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: '#fff',
+const tabStyles = StyleSheet.create({
+  bar: {
+    backgroundColor: colors.card,
     borderTopWidth:  1,
-    borderTopColor:  '#f3f4f6',
-    height:          72,
-    paddingBottom:   12,
-    paddingTop:      8,
+    borderTopColor:  colors.borderLight,
+    height:          Platform.OS === 'ios' ? 82 : 68,
+    paddingBottom:   Platform.OS === 'ios' ? 24 : 10,
+    paddingTop:      spacing.sm,
     shadowColor:     '#000',
     shadowOffset:    { width: 0, height: -2 },
     shadowOpacity:   0.06,
     shadowRadius:    8,
     elevation:       8,
   },
-  tabItem: {
+  item: {
     alignItems: 'center',
-    gap: 2,
+    gap:        2,
   },
-  tabEmoji: {
-    fontSize: 22,
-    opacity: 0.5,
+  emoji:        { fontSize: 20, opacity: 0.45 },
+  emojiFocused: { opacity: 1 },
+  label:        { ...typography.xs, color: colors.textMuted },
+  labelFocused: { color: colors.primary, fontWeight: '700' },
+
+  badge: {
+    position:        'absolute',
+    top:             -4,
+    right:           -8,
+    backgroundColor: colors.error,
+    borderRadius:    radius.full,
+    minWidth:        16,
+    height:          16,
+    alignItems:      'center',
+    justifyContent:  'center',
+    paddingHorizontal: 3,
   },
-  tabEmojiFocused: {
-    opacity: 1,
-  },
-  tabLabel: {
-    fontSize: 10,
-    color: '#9ca3af',
-  },
-  tabLabelFocused: {
-    color:      '#6366f1',
-    fontWeight: '600',
-  },
+  badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
 })

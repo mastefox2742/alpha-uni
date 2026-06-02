@@ -1,0 +1,64 @@
+{
+  "cli": {
+    "version": ">= 10.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:3001",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://placeholder.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "placeholder"
+      }
+    },
+
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+
+    "production": {
+      "distribution": "store",
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "autoIncrement": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.unigest.fr",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://VOTRE_PROJECT.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "VOTRE_ANON_KEY"
+      }
+    }
+  },
+
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      },
+      "ios": {
+        "appleId": "votre@email.com",
+        "ascAppId": "VOTRE_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "VOTRE_TEAM_ID"
+      }
+    }
+  }
+}

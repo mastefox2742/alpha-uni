@@ -1,0 +1,70 @@
+version: 2
+
+updates:
+  # ─── Packages npm — API ───────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /packages/api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - maintainers
+    labels:
+      - dependencies
+      - security
+    ignore:
+      # Ignore les patches de dev — focus sur les vulnérabilités
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      supabase:
+        patterns: ["@supabase/*"]
+      express:
+        patterns: ["express", "cors", "helmet", "compression", "morgan", "express-rate-limit"]
+
+  # ─── Packages npm — Web ───────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /packages/web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - security
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      next:
+        patterns: ["next", "react", "react-dom", "@types/react*"]
+      supabase:
+        patterns: ["@supabase/*"]
+      tanstack:
+        patterns: ["@tanstack/*"]
+
+  # ─── Packages npm — Mobile ────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /packages/mobile
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - mobile
+
+  # ─── GitHub Actions ──────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+    labels:
+      - dependencies
+      - github-actions

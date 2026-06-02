@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ExamSessionsList } from '@/components/teacher/ExamSessionsList'
+import { CourseDetail } from '@/components/teacher/CourseDetail'
 
 export const metadata: Metadata = { title: 'Détail cours — Enseignant' }
 
@@ -12,6 +13,17 @@ export default async function CourseDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+
+  // ── Demo mode ────────────────────────────────────────────────────────────
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <CourseDetail courseId={id} />
+      </div>
+    )
+  }
+
+  // ── Production: Supabase ─────────────────────────────────────────────────
   const supabase = await createClient()
 
   const { data: course } = await supabase

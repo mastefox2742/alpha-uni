@@ -37,5 +37,24 @@ router.use('/quiz',          quizRouter)
 router.use('/forum',         forumRouter)
 
 // Phase 5 — Thèse & Finalisation
-import { thesisRouter } from './thesis.routes'
+import { thesisRouter }     from './thesis.routes'
 router.use('/thesis',        thesisRouter)
+
+// Phase 6 — Back-office Admin
+import { roomsRouter }      from './rooms.routes'
+import { calendarRouter }   from './calendar.routes'
+import { graduationRouter } from './graduation.routes'
+import { missionsRouter }   from './missions.routes'
+import { programsRouter }   from './programs.routes'
+import { reportsRouter }    from './reports.routes'
+
+router.use('/rooms',         roomsRouter)
+router.use('/calendar',      calendarRouter)
+router.use('/graduation',    graduationRouter)
+router.use('/missions',      missionsRouter)
+router.use('/programs',      programsRouter)
+router.use('/reports',       reportsRouter)
+
+// Phase 7 — RGPD (Articles 15, 16, 17, 20)
+import { gdprRouter } from './gdpr.routes'
+router.use('/gdpr', gdprRouter)

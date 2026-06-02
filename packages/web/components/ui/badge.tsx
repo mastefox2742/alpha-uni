@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-type Variant = 'default' | 'success' | 'warning' | 'destructive' | 'outline'
+type Variant = 'default' | 'success' | 'warning' | 'destructive' | 'outline' | 'lode'
 
 const variants: Record<Variant, string> = {
   default:     'bg-primary text-primary-foreground',
@@ -8,6 +8,7 @@ const variants: Record<Variant, string> = {
   warning:     'bg-yellow-100 text-yellow-800',
   destructive: 'bg-red-100 text-red-800',
   outline:     'border border-border text-foreground',
+  lode:        'bg-violet-100 text-violet-800',
 }
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

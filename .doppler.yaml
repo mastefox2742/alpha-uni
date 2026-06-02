@@ -1,0 +1,18 @@
+setup:
+  project: unigest
+  config: dev
+
+# ─── Utilisation ──────────────────────────────────────────────────────────────
+#
+# Installation : npm install -g @dopplerhq/cli
+# Authentification : doppler login
+# Setup projet : doppler setup
+#
+# Lancer l'API avec les secrets injectés automatiquement :
+#   doppler run -- npm run dev --workspace=packages/api
+#
+# Lancer le web :
+#   doppler run -- npm run dev --workspace=packages/web
+#
+# En CI (GitHub Actions) :
+#   doppler run --token=${{ secrets.DOPPLER_TOKEN }} -- npm run build
