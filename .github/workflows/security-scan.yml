@@ -42,7 +42,7 @@ jobs:
       # ─── 2. ZAP API Scan ────────────────────────────────────────────────────
       # Scan de l'API avec OpenAPI/swagger (si disponible)
       - name: ZAP API Scan
-        uses: zaproxy/action-api-scan@v0.7.0
+        uses: zaproxy/action-api-scan@v0.10.0
         continue-on-error: true
         with:
           target: ${{ github.event.inputs.target_url || 'https://api-unigest-staging.up.railway.app' }}/api
